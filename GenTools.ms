@@ -8,7 +8,7 @@ if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
 /*
 		Variables!
 */
-(
+
 	defaultErrorMessage = "Nothing Selected"
 	sourceFolder = trimRight (getFileNamePath (getThisScriptFilename())) "\\"
 	rootFolder = (getDir #userScripts) + "/GenTools"
@@ -37,11 +37,11 @@ if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
 	compartmentlistini = "Z:/Projects/V&T/MaxScript/DickTools/Source/compartmentlist.ini"
 	compartmentlistarray = getIniSetting compartmentlistini
 	selectedcompartment = ""
-)
+
 /*
 		Prefrences!
 */
-(
+
 	rollout genToolsPreferencesRollout "GenTools Preferences" width:160 height:152
 	(
 		checkbox startupcheck "Load on Startup" pos:[16,8] width:136 height:16 checked:false
@@ -96,11 +96,11 @@ if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
 			setIniSetting preferencesIni "Location and Position" "dockstate" (stat as string)
 		)
 	)
-)
+
 /*
 		Functions!
 */
-(
+
 		function MovePivotDirection dir = 
 	(
 			local selection = $
@@ -312,11 +312,11 @@ if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
 			messageBox "couldn't find the layer"
 		)
 	)
-)
+
 /*
 		Sub Rollouts!
 */
-( -- Tools
+ -- Tools
 	rollout mainTools "Tools" width:162 height:228
 	(
 		button boxmap "Box" pos:[16,144] width:56 height:24 toolTip:"Box map to real world scale"
@@ -416,7 +416,7 @@ if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
 		button smoothbtn "Smooth" pos:[96,48] width:56 height:24 toolTip:"Smooths all and selects all edges for an Editable Poly"
 		button wireuv "Wire UV" pos:[16,128] width:64 height:24 toolTip:"UVXform for wires"
 		button sweepuv "Sweep UV" pos:[88,96] width:64 height:24 toolTip:"Real world mapping coords for sweep"
-		GroupBox boxgroup "Blue Box Stuff" pos:[8,0] width:152 height:80
+		GroupBox boxgroup "Box Stuff" pos:[8,0] width:152 height:80
 		button addsweep "Sweep" pos:[16,96] width:64 height:24 toolTip:"Adds a cylindrical sweep "
 		GroupBox pipegroup "Pipe stuff" pos:[8,80] width:152 height:80
 
@@ -812,8 +812,8 @@ if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
 			)
 		)
 	)
-)
-( -- Export
+
+ -- Export
 	rollout diXporterRollout "DiXporter" width:162 height:161
 	(
 		
@@ -822,7 +822,7 @@ if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
 		checkbox prefabscheck "Prefab" pos:[62,32] width:62 height:24 checked:true
 		checkbox pipescheck "Pipes" pos:[120,32] width:56 height:24 checked:true
 		checkbox scenecheck "Scene" pos:[8,32] width:48 height:24 checked:true
-		dropdownList compartmentlist "" pos:[8,8] width:160 height:21 items:compartmentlistarray
+		--dropdownList compartmentlist "" pos:[8,8] width:160 height:21 items:compartmentlistarray
 		button exportbtn "export" pos:[24,56] width:128 height:21 toolTip:""
 		label lbl3 "Remember to prefix your layers with 'P^' and 'Prefabs^'. Main layer should be named as the same as the compartment." pos:[8,80] width:168 height:56
 		button reloadbtn "Reload list" pos:[24,136] width:128 height:21
@@ -994,7 +994,7 @@ if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
 			
 		)
 	)
-)
+
  /*
 		Main Menu Section!
 */
@@ -1081,7 +1081,7 @@ if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
 /*
 		Generate the Dialog!
 */
-(
+
 	createDialog genToolsMain menuWidth menuHeight getMenuWidth getMenuHeight style:#(#style_toolwindow, #style_sysmenu, #style_minimizebox)
 	cui.RegisterDialogBar genToolsMain style:#(#cui_dock_vert, #cui_floatable, #cui_handels) minSize:[menuWidth, 350] maxSize:[menuWidth,1600]
 	if getIniSetting preferencesIni "Location and Position" "dockstate" as integer != 1 do
@@ -1096,4 +1096,3 @@ if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
 		)
 		cui.DockDialogBar genToolsMain (execute (dockto))
 	)
-)
