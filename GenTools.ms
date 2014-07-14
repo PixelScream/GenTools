@@ -34,7 +34,7 @@ if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
 	getMenuHeight = (getIniSetting preferencesIni "Location and Position" "y") as integer
 	
 	-- Export Stuffs
-	compartmentlistini = "Z:/Projects/V&T/MaxScript/DickTools/Source/compartmentlist.ini"
+	compartmentlistini = sourceFolder + "/Sections/Export/compartmentlist.ini"
 	compartmentlistarray = getIniSetting compartmentlistini
 	selectedcompartment = ""
 
@@ -42,15 +42,20 @@ if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
 		Prefrences!
 */
 
-	rollout genToolsPreferencesRollout "GenTools Preferences" width:160 height:152
+	rollout genToolsPreferencesRollout "GenTools Preferences" width:160 height:264
 	(
 		checkbox startupcheck "Load on Startup" pos:[16,8] width:136 height:16 checked:false
-		button resetbtn "Reset GenTools" pos:[24,128] width:112 height:16
-		radioButtons dockedstateradio "Start -" pos:[16,32] width:89 height:62 labels:#("Floating", "Docked Left", "Docked Right")
+		button resetbtn "Reset GenTools" pos:[24,240] width:112 height:16
+		radiobuttons dockedstateradio "Start Position-" pos:[16,32] width:89 height:62 labels:#("Floating", "Docked Left", "Docked Right")
+		checkbox genmappingcheck "Generate Mapping" pos:[16,120] width:128 height:16 checked:true
+		checkbox realworldcheck "Real World Scale" pos:[16,136] width:128 height:16 checked:true
+		label lbl4 "Auto Gen Mapping on Modifiers" pos:[5,100] width:152 height:17
 		on genToolsPreferencesRollout open do
 		(
 			startupcheck.checked = (getIniSetting preferencesIni "Startup" "startup" as booleanClass)
 			dockedstateradio.state = (getIniSetting preferencesIni "Location and Position" "dockstate" as integer)
+			genmappingcheck.state = (getIniSetting preferencesIni "Mod Info" "genmapping") as booleanClass
+			realworldcheck.state = (getIniSetting preferencesIni "Mod Info" "realworldmapping") as booleanClass
 		)
 		on startupcheck changed state do
 		(
@@ -95,8 +100,26 @@ if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
 		(
 			setIniSetting preferencesIni "Location and Position" "dockstate" (stat as string)
 		)
+		on genmappingcheck changed state do
+		(
+			setIniSetting preferencesIni "Mod Info" "genmapping" (state as string)
+			realworldcheck.enabled = state
+		)
+		on realworldcheck changed state do
+		(
+			setIniSetting preferencesIni "Mod Info" "realworldmapping" (state as string)
+		)
 	)
-
+	
+rollout mainPrefrences "Prefrences" width:184 height:404
+(
+	subRollout roSubA "" pos:[0,0] width:184 height:400
+	
+	on mainPrefrences open  do
+	(
+		AddSubRollout mainPrefrences.roSubA genToolsPreferencesRollout
+	)
+)
 /*
 		Functions!
 */
@@ -281,25 +304,33 @@ if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
 			(LayerManager.getLayerFromName(layer)).nodes &nodes
 			originals = nodes
 			select nodes
-				
+			
 			objs = selection
 			if objs.count != 0 then
 			(
+				/*
 				--createDialog progressBarRollout
 				objArray = 
 				(
 					for i = 1 to objs.count collect
 					(
 						--progressBarRollout.progress.value = ((100 / objs.count) * i)
+						curPercent = (((i as float)/ (objs.count as float)) * 100.0)
+						diXporterRollout.exportprogress.value = curPercent
+						print curPercent
 						copiedMesh = copy objs[i]
 						convertToMesh = copiedMesh
 					)
 				)
 				--convertToMesh ObjArray
 				select ObjArray
+				*/
 				exportFile exportTo  selectedOnly:true #noPrompt
+				/*
 				delete ObjArray
 				select originals
+				diXporterRollout.exportprogress.value = 0
+				*/
 				--try(destroyDialog progressBarRollout)catch()
 			)
 			else
@@ -319,6 +350,7 @@ if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
  -- Tools
 	rollout mainTools "Tools" width:162 height:228
 	(
+		local isFrozenInGray = true
 		button boxmap "Box" pos:[16,144] width:56 height:24 toolTip:"Box map to real world scale"
 		button collapseto "Collapse To" pos:[88,96] width:64 height:24 toolTip:"Runs 'Collapse to' for selection"
 		button collapsepoly "CollapsePoly" pos:[16,96] width:64 height:24 toolTip:"Collapses to Editable poly"
@@ -398,14 +430,27 @@ if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
 			)
 		)
 		)
+		
 		on frozenbtn pressed do
 		(
-			for o in objects do
+			if isFrozenInGray != false then
 			(
-				o.showFrozeninGray = false
+				for o in objects do
+				(
+					o.showFrozeninGray = false
+				)
+				isFrozenInGray = false
+				print "Objects are nolonger frozen in gray"
 			)
-			frozenAsGray = false
-			print "Objects are nolonger frozen in gray"
+			else  
+			(
+					for o in objects do
+					(
+						o.showFrozeninGray = true
+					)
+					isFrozenInGray = true
+					print "Objects are now frozen in gray"
+			)
 		)
 	)
 	rollout pipesandboxesrollout "Pipes & Boxes" width:162 height:164
@@ -720,6 +765,23 @@ if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
 		for obj in selection do obj.name = uniqueName prefix
 		)
 	)
+	rollout sellectbymodRollout "Select By Modifier" width:160 height:56
+	(
+		dropdownList modList "Modifier" pos:[8,8] width:144 height:40 items:#(" ", "sweep", "symmetry", "Edit_Poly", "Uvwmap", "UVW_Mapping_Add", "Lathe") selection:1
+		on modList selected i do
+		(
+			format "you selected '%'!\n" modList.items[i]
+			S = #()
+			for O in objects do
+			(
+				for m in O.modifiers do
+				(
+					if ((classof M) as string) == modList.items[i] do( Append S O)	
+				)
+			)
+			Select S
+		)
+	)
 	rollout PipeTool "Bibs Valve Placer" width:160 height:160
 	(
 		global spheres = #()
@@ -814,26 +876,27 @@ if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
 	)
 
  -- Export
-	rollout diXporterRollout "DiXporter" width:162 height:161
+	rollout diXporterRollout "DiXporter" width:176 height:176
 	(
 		
 		local exportlabel = "Export_To" 
 	 
-		checkbox prefabscheck "Prefab" pos:[62,32] width:62 height:24 checked:true
-		checkbox pipescheck "Pipes" pos:[120,32] width:56 height:24 checked:true
-		checkbox scenecheck "Scene" pos:[8,32] width:48 height:24 checked:true
-		--dropdownList compartmentlist "" pos:[8,8] width:160 height:21 items:compartmentlistarray
-		button exportbtn "export" pos:[24,56] width:128 height:21 toolTip:""
-		label lbl3 "Remember to prefix your layers with 'P^' and 'Prefabs^'. Main layer should be named as the same as the compartment." pos:[8,80] width:168 height:56
-		button reloadbtn "Reload list" pos:[24,136] width:128 height:21
+		checkbox prefabscheck "Prefab" pos:[56,40] width:56 height:24 checked:true
+		checkbox pipescheck "Pipes" pos:[112,40] width:56 height:24 checked:true
+		checkbox scenecheck "Scene" pos:[8,40] width:48 height:24 checked:true
+		dropdownList compartmentlist "" pos:[8,16] width:160 height:21 items:#("Choose Compartment", "V_Main_Hydraulic_Plant", "V_LP_Blower_Compartment", "V_Garbage_Ejector_Service_Space", "V_Buoyant_Wire_Ariel_Compartment", "T_WSC", "V_Processing_Room", "V_Air_Ram_Space", "V_Machinery_Workshop_DCHQ_2", "V_MMS", "V_MMS_D", "V_MMS_C")
+		button exportbtn "export" pos:[24,64] width:128 height:21 toolTip:""
+		label lbl3 "Remember to prefix your layers with 'P^' and 'Prefabs^'. Main layer should be named as the same as the compartment." pos:[8,88] width:168 height:56
+		button reloadbtn "Reload list" pos:[24,144] width:128 height:21
+		progressBar exportprogress "ProgressBar" pos:[0,0] width:176 height:16
 		on compartmentlist selected sel do
 		(
 			selectedcompartment = compartmentlist.selected
 		)
 		on exportbtn pressed do
 		(
-			with redraw off 
-			(
+			--with redraw off 
+			--(
 				if compartmentlist.selection != 1 then --check for a selected compartments
 				(
 					mainLayer = LayerManager.getLayerFromName(selectedcompartment) 
@@ -865,7 +928,7 @@ if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
 				(
 					messageBox "pick a compartment"
 				)
-			)
+			--)
 		)
 		on reloadbtn pressed do
 		(
@@ -1007,8 +1070,9 @@ if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
 		checkbutton chbShowB "Export" pos:[88,32] width:53 height:21 checked:false
 		subRollout roSubA "" pos:[0,56] width:184 height:672
 		subRollout roSubB "" pos:[0,56] width:184 height:672 visible:false
-		button dockbtn "<" pos:[56,736] width:32 height:19
-		button undockbtn ">" pos:[88,736] width:32 height:19
+		button dockbtn "<" pos:[40,736] width:32 height:19
+		button undockbtn "x" pos:[72,736]  width:32 height:19
+		button dockrightbtn ">" pos:[104,736] width:32 height:19
 		button prefsbtn "Preferences" pos:[160,32] width:22 height:20 images:#("Pref_Icons.bmp", "undefined", 2, 1, 2, 1, 1)
 		--- Functions
 		fn repositionUI =
@@ -1018,6 +1082,7 @@ if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
 			roSubB.height = menuHeight - subMenuBuffer
 			dockbtn.pos.y = menuHeight - bottomBtnHeight
 			undockbtn.pos.y = menuHeight - bottomBtnHeight
+			dockrightbtn.pos.y = menuHeight - bottomBtnHeight
 		)
 		on genToolsMain open do
 		(		
@@ -1031,10 +1096,25 @@ if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
 			AddSubRollout genToolsMain.roSubA snapRotationDialog rolledUp:true 
 			AddSubRollout genToolsMain.roSubA renamerRollout rolledUp:true 
 			AddSubRollout genToolsMain.roSubA PipeTool rolledUp:true 
+			AddSubRollout genToolsMain.roSubA sellectbymodRollout rolledUp:true
 			-- B rollout
 			AddSubRollout genToolsMain.roSubB diXporterRollout enabled:false
 			AddSubRollout genToolsMain.roSubB addCompartmentRollout rolledUp:true enabled:false
 			AddSubRollout genToolsMain.roSubB packer rolledUp:true enabled:false
+				
+			-- Get the Generate Mapping Script
+			global mappinggencheck 
+			if mappinggencheck == undefined do
+			(
+				mapgenlocation = sourceFolder + "/Sections/GenerateMapping/genMapping.ms"
+				try(
+					filein mapgenlocation
+				) catch 
+				(
+					messagebox "Couldn't find the mapping script"
+				)
+				mappinggen == true
+			)
 		)
 		on genToolsMain close do
 		(
@@ -1064,16 +1144,21 @@ if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
 		)
 		on dockbtn pressed do
 		(
-
+			cui.DockDialogBar genToolsMain #cui_dock_left
 		)
 		on undockbtn pressed do
 		(
-
+			cui.FloatDialogBar genToolsMain
+			
+		)
+		on dockrightbtn pressed do
+		(
+			cui.DockDialogBar genToolsMain #cui_dock_right
 		)
 		on prefsbtn pressed do
 		(
-			try(destroyDialog genToolsPreferencesRollout)catch() 
-			createDialog genToolsPreferencesRollout
+			try(destroyDialog mainPrefrences)catch() 
+			createDialog mainPrefrences
 		)
 	)
 )
