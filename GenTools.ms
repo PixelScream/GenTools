@@ -874,7 +874,78 @@ rollout mainPrefrences "Prefrences" width:184 height:404
 			)
 		)
 	)
-
+	
+	
+rollout PhilRollout "Phil Tools" width:162 height:132
+(
+	button randomcolorbtn "rand. color" pos:[8,8] width:64 height:24
+	button childselbtn "select child" pos:[8,40] width:64 height:24
+	button uniquenamebtn "uniqu name" pos:[80,8] width:64 height:24
+	button dummybtn "dummy" pos:[8,72] width:64 height:24
+	button parentdummybtn "Parent" pos:[80,72] width:64 height:24 enabled:false
+	button flipbtn "flip" pos:[8,104] width:64 height:24 enabled:false
+	button selectparentbtn "select par" pos:[80,40] width:64 height:24
+	on randomcolorbtn pressed do
+	(
+	for i in selection do ( i.wirecolor = random white black ) 
+	)
+	on childselbtn pressed do
+	(
+	for obj in selection do selectMore obj.children
+	)
+	on uniquenamebtn pressed do
+	(
+	for i in selection do ( i.name = uniqueName "Mesh" ) 
+	)
+	on dummybtn pressed do
+	(
+		theSel = for obj in selection collect obj
+		if theSel.count != 0 then
+		(
+			for obj in theSel do ( dummy pos:obj.pos )
+		)
+		else 
+		(
+			dummy()
+		)
+	)
+	on parentdummybtn pressed do
+	(
+		theSel = for obj in selection collect obj
+		if theSel.count != 0 then
+		(
+			for obj in theSel do 
+			( 
+				parentDummy = dummy pos:obj.pos name:("P_" + obj.name) size:1
+				childDummy = dummy pos:obj.pos name:("ro_for" + obj.name) size:0.5
+				obj.parent = childDummy
+				childDummy.parent = parentDummy
+				childDummy.rotation += unityRot as quat
+				
+				for o in obj.children do
+				(
+					if classOf o == Dummy do
+						ResetXform o
+				)
+			)
+		)
+		else 
+		(
+			dummy()
+		)
+	)
+	on flipbtn pressed do
+	(
+	Flip()
+	)
+	on selectparentbtn pressed do
+	(
+		curSel = $
+		node = curSel[1]
+		while node.parent != undefined do node = node.parent
+		select node
+	)
+)
  -- Export
 	rollout diXporterRollout "DiXporter" width:176 height:176
 	(
@@ -1096,7 +1167,8 @@ rollout mainPrefrences "Prefrences" width:184 height:404
 			AddSubRollout genToolsMain.roSubA snapRotationDialog rolledUp:true 
 			AddSubRollout genToolsMain.roSubA renamerRollout rolledUp:true 
 			AddSubRollout genToolsMain.roSubA PipeTool rolledUp:true 
-			AddSubRollout genToolsMain.roSubA sellectbymodRollout rolledUp:true
+			AddSubRollout genToolsMain.roSubA sellectbymodRollout rolledUp:true PhilRollout
+			AddSubRollout genToolsMain.roSubA PhilRollout 
 			-- B rollout
 			AddSubRollout genToolsMain.roSubB diXporterRollout enabled:false
 			AddSubRollout genToolsMain.roSubB addCompartmentRollout rolledUp:true enabled:false
