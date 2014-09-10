@@ -1,7 +1,7 @@
 /*
 	Welcome to GenTools!
 */
--- First need to check if an instance of the rollout's already open, unregister it and destroy it to avoid duplicates
+-- Check for existing instance and destroy it
 try( 	cui.UnRegisterDialogbar genToolsMain) catch()
 if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
 
@@ -343,7 +343,11 @@ rollout mainPrefrences "Prefrences" width:184 height:404
 			messageBox "couldn't find the layer"
 		)
 	)
-
+	
+	rollout progressRollout "Objects light map uv's" 
+	(
+		progressBar progressb "ProgressBar" pos:[8,8] width:144 height:24
+)	
 /*
 		Sub Rollouts!
 */
@@ -782,109 +786,24 @@ rollout mainPrefrences "Prefrences" width:184 height:404
 			Select S
 		)
 	)
-	rollout PipeTool "Bibs Valve Placer" width:160 height:160
-	(
-		global spheres = #()
-		local hasnotcreated = true
-		
-		spinner count "count" pos:[52,7] width:97 height:16 range:[1,50,5] type:#integer
-		pickbutton detail "Pick Detail" pos:[16,48] width:128 height:21 enabled:false 
-	 
-	 
-	 
 
-		button create "Create Pipe" pos:[32,104] width:100 height:21 enabled:false
-		button cancel "Cancel" pos:[8,128] width:70 height:21 toolTip:"I'm temprimental"
-		button commit "Commit" pos:[80,128] width:70 height:21 enabled:false
-		pickbutton curve "Pick Curve" pos:[16,26] width:128 height:18
-		checkbox widthcheck "widthcheck" pos:[136,80] width:16 height:16
-
-
-		spinner widthspinner "Width" pos:[24,80] width:105 height:16 range:[1,50,5] type:#integer
-
-
-		on detail picked obj do
-		(
-			detail.text = obj.name
-			print obj.name
-			create.enabled = true
-		)
-		on create pressed do
-		(
-			if hasnotcreated then
-			(
-				spheres = for i in int 1 to count.value collect
-					 instance detail.object pos:[0,0, i ] 
-						 
-					AttatchToSpline(curve.object)
-					 hasnotcreated = false
-		
-			)
-			else
-			(
-				delete spheres
-				print "has created"
-				create.text = "Reload"
-				spheres = for i in int 1 to count.value collect
-					 instance detail.object pos:[0,0, i ] 
-						 
-				AttatchToSpline(curve.object)
-		
-			)
-				 
-		)
-		on cancel pressed do
-		(	
-			if spheres.count > 0 do
-			(
-				try(delete spheres)catch()
-			)
-		)
-		on commit pressed do
-		(	
-			if spheres.count > 0 do
-			(
-				max spacebar
-				DestroyDialog(PipeTool)
-			)
-		)
-		on curve picked obj do
-		(
-			curve.text = obj.name
-			detail.enabled = true
-		local curveobject = obj
-		)
-		on widthspinner changed val do
-		(
-		if curve.object != null then
-		(
-				local curveject 
-				curveject = curve.object
-				curveject.render_displayRenderMesh = true
-				curveject.render_mapcoords = true
-				curveject.realWorldMapSize = true
-				
-				local curvewidth
-				curvewidth = widthspinner.value
-				curveject.render_thickness = 0.01 * curvewidth
-			)
-			else
-			(
-				messageBox "pick a curve"
-			)
-		)
-	)
 	
-	
-rollout PhilRollout "Phil Tools" width:162 height:132
+rollout PhilRollout "Phil Tools" width:160 height:184
 (
-	button randomcolorbtn "rand. color" pos:[8,8] width:64 height:24
-	button childselbtn "select child" pos:[8,40] width:64 height:24
-	button uniquenamebtn "uniqu name" pos:[80,8] width:64 height:24
-	button dummybtn "dummy" pos:[8,72] width:64 height:24
-	button parentdummybtn "Parent" pos:[80,72] width:64 height:24 enabled:false
-	button flipbtn "flip" pos:[8,104] width:64 height:24 enabled:false
-	button selectparentbtn "select par" pos:[80,40] width:64 height:24
+	button randomcolorbtn "rand. color" pos:[8,8] width:64 height:16
+	button childselbtn "select child" pos:[8,32] width:64 height:16
+	button uniquenamebtn "uniqu name" pos:[80,8] width:64 height:16
+	button dummybtn "dummy" pos:[8,56] width:64 height:16
+	button parentdummybtn "Parent" pos:[80,56] width:64 height:16 enabled:false
+	button flipbtn "flip" pos:[80,80] width:64 height:16 enabled:false
+	button selectparentbtn "select par" pos:[80,32] width:64 height:16
+	button scaledownbtn "scale down" pos:[80,104] width:64 height:16
+	button scaleuvbtn "Scale UV" pos:[8,104] width:64 height:17
+	button checkerbtn "Checker" pos:[8,128] width:64 height:17
+	button dummyresizebtn "resize d" pos:[8,80] width:64 height:16 
+	button isooffbtn "Iso Off" pos:[8,152] width:64 height:17
+	button isoonbtn "Iso On" pos:[80,152] width:64 height:17
+	button lmpbtn "LM Pack" pos:[8,176] width:64 height:17
 	on randomcolorbtn pressed do
 	(
 	for i in selection do ( i.wirecolor = random white black ) 
@@ -945,7 +864,213 @@ rollout PhilRollout "Phil Tools" width:162 height:132
 		while node.parent != undefined do node = node.parent
 		select node
 	)
+	on scaledownbtn pressed do
+	(
+		x = Xform name:"Scale down Mavig"
+		scaleVal = 0.1
+		newSale = [scaleVal,scaleVal,scaleVal]
+		max modify mode
+		modPanel.addModToSelection (x) ui:on
+		x.gizmo.scale = newSale
+	)
+	on scaleuvbtn pressed do
+	(
+		tilesScale = 0.01
+		u = UVW_XForm U_Tile:tilesScale V_Tile:tilesScale W_Tile:tilesScale name:"Scale UVS CM to M"
+		for obj in selection where superClassOf obj == GeometryClass do addModifier obj (u)
+	)
+	on checkerbtn pressed do
+	(
+	c = Checker color2:(color 200 200 200) color1:(color 50 50 50)
+
+	for obj in selection where superClassOf obj == GeometryClass do 
+	(
+		theMaterial = obj.material
+		if classOf theMaterial == Standard do
+		(
+			c = Checker color2:(color 200 200 200) color1:(color 50 50 50)
+			theMaterial.diffuseMap = c
+			theMaterial.diffuseMapEnable = on
+		)
+		showTextureMap theMaterial true
+	)
+	)
+	on uncheckerbtn pressed do
+	(
+		for obj in selection do 
+		(
+			theMaterial = obj.material
+			if classOf theMaterial == Standard do
+			(
+				theMaterial.diffuseMapEnable = off
+			)
+		)
+	)
+	on dummyresizebtn pressed do
+	(
+		theSel = selection as array
+		if theSel.length == 1 do
+		(
+			$.boxsize = [20,20,20]
+		)
+	)
+	
+	on isooffbtn pressed do
+	(
+		for obj in selection do 
+		( 
+			for m in obj.modifiers do 
+			( 
+				if (classof m as string) == "TurboSmooth" do ( m.isolineDisplay = false)
+			)
+		)
+	)
+	on isoonbtn pressed do
+	(
+		for obj in selection do 
+		( 
+			for m in obj.modifiers do 
+			( 
+				if (classof m as string) == "TurboSmooth" do ( m.isolineDisplay = true)
+			)
+		)
+	)
+		on lmpbtn pressed do
+	(
+		createDialog progressRollout
+		theNodes = selection as array
+		lmName = "lightmap pack"
+		max modify mode
+		with redraw off
+		count = 1
+		for obj in theNodes do
+		(
+			select obj
+			if obj.modifiers[1] == undefined or obj.modifiers[1].name != lmName do
+			(
+				ConvertToPoly obj
+				--format "lightmapping %" obj.name
+				channelInfo.addChannel obj
+				channelInfo.CopyChannel obj 3 1
+				channelInfo.PasteChannel obj 3 2
+				channelInfo.NameChannel obj 3 2 "-lm-"
+				nUV = Unwrap_UVW name:lmName
+				addModifier obj nUV
+				obj.modifiers[lmName].unwrap.setMapChannel 2
+				subobjectLevel = 3
+				max select all
+				obj.modifiers[lmName].pack 0 0.02 true false false
+				subobjectLevel = 0
+				max select none
+				prog = (count as float /theNodes.count as float) * 100.0
+				print prog
+				count += 1
+				progressRollout.progressb.value = prog
+			)
+		)
+		destroyDialog progressRollout
+	)
 )
+rollout lazyRollout "Boolean lazyness" width:162 height:109
+(
+	spinner tolspin "Tolerance" pos:[16,8] width:136 height:16 range:[-1,1,0.98] scale:0.01
+	button vertbtn "Delete Coplanar Verts" pos:[8,32] width:140 height:14
+	button tribtn "Triangulate NonQuads" pos:[8,56] width:140 height:14
+	button quadbtn "Vis Specific Edge" pos:[8,80] width:96 height:14
+	dropdownList edgedrop "" pos:[112,77] width:32 height:21 items:#("1", "2", "3") selection:2
+	on vertbtn pressed do
+	(
+		theSel = selection
+		max modify mode
+		with undo on
+		(
+			for obj in theSel where classOf obj == Editable_Poly do
+			(
+				vertSel = obj.numverts
+				l = #()
+					for i = vertSel to 1 by -1 do
+					(
+						v = i
+						select obj.verts[v]
+						nVerts = (polyop.getedgesusingvert obj v) as array
+						if nVerts.count == 2 do
+						(
+							vertsToDot = (polyop.getVertsUsingEdge obj nVerts) as array
+							v1 =  obj.verts[vertsToDot[2]].pos - obj.verts[vertsToDot[1]].pos
+							v2 = obj.verts[vertsToDot[3]].pos - obj.verts[vertsToDot[1]].pos
+							d = dot (normalize v1) (normalize v2)
+							--print d
+							if d >= tolspin.value do
+								append l v
+						)
+					)
+					select obj
+					subobjectlevel = 1
+					select obj.verts[l]
+					format "Deleting % redundant verts from %\n" l.count obj.name
+					obj.EditablePoly.buttonOp #Remove
+					subobjectlevel = 0
+			)
+		)
+	)
+	on tribtn pressed do
+	(
+		max modify mode
+		with undo on
+		(
+			theSel = selection
+			for obj in theSel where classOf obj == Editable_Poly do
+			(
+				faceCount = obj.numfaces
+				nonQuads = #()
+					for f = 1 to faceCount do
+					(
+						faceVerts = polyop.getFaceDeg obj f
+						if faceVerts != 4 do append nonQuads f
+					)
+					polyop.setFaceSelection obj nonQuads
+					format "Triangulating % many faces on %\n" nonQuads.count obj.name
+					ConvertToMesh obj		
+					selectedFaces = getFaceSelection obj as array
+					for i in selectedFaces do 
+					(
+						setEdgeVis obj i 1 true
+						setEdgeVis obj i 2 true
+						setEdgeVis obj i 3 true
+					)
+					ConvertToPoly obj
+			)
+		)
+	)
+	on quadbtn pressed do
+	(
+		max modify mode
+		with undo on
+		(
+			theSel = selection
+			for obj in theSel where classOf obj == Editable_Poly do
+			(
+				faceCount = obj.numfaces
+				nonQuads = #()
+					for f = 1 to faceCount do
+					(
+						faceVerts = polyop.getFaceDeg obj f
+						if faceVerts != 4 do append nonQuads f
+					)
+					polyop.setFaceSelection obj nonQuads
+					format "Triangulating % many faces on %\n" nonQuads.count obj.name
+					ConvertToMesh obj		
+					selectedFaces = getFaceSelection obj as array
+					for i in selectedFaces do 
+					(
+						setEdgeVis obj i edgedrop.selection true
+					)
+					ConvertToPoly obj
+			)
+		)
+	)
+)
+
  -- Export
 	rollout diXporterRollout "DiXporter" width:176 height:176
 	(
@@ -1128,6 +1253,19 @@ rollout PhilRollout "Phil Tools" width:162 height:132
 			
 		)
 	)
+rollout fileinDiXporter "Open DiXporter" width:162 height:300
+(
+	button btn13 "DiXporter" pos:[24,8] width:120 height:16
+	button btn15 "eXperimental" pos:[25,32] width:120 height:16
+	on btn13 pressed do
+	(
+		filein @"Y:\Resources\2014\GenTools\DiXporter\DiXporter.ms"
+	)
+	on btn15 pressed do
+	(
+		filein @"Y:\Resources\2014\GenTools\DiXporter\DiXporter_Experimental.ms"
+	)
+)
 
  /*
 		Main Menu Section!
@@ -1162,17 +1300,19 @@ rollout PhilRollout "Phil Tools" width:162 height:132
 			repositionUI()
 			-- Add all the sub rollouts
 			AddSubRollout genToolsMain.roSubA mainTools
+			AddSubRollout genToolsMain.roSubA PhilRollout 
 			AddSubRollout genToolsMain.roSubA pipesandboxesrollout
 			AddSubRollout genToolsMain.roSubA PShiftRollout rolledUp:true 
 			AddSubRollout genToolsMain.roSubA snapRotationDialog rolledUp:true 
 			AddSubRollout genToolsMain.roSubA renamerRollout rolledUp:true 
-			AddSubRollout genToolsMain.roSubA PipeTool rolledUp:true 
-			AddSubRollout genToolsMain.roSubA sellectbymodRollout rolledUp:true PhilRollout
-			AddSubRollout genToolsMain.roSubA PhilRollout 
+			AddSubRollout genToolsMain.roSubA sellectbymodRollout rolledUp:true 
+			AddSubRollout genToolsMain.roSubA lazyRollout rolledUp:true 	
+			
 			-- B rollout
-			AddSubRollout genToolsMain.roSubB diXporterRollout enabled:false
-			AddSubRollout genToolsMain.roSubB addCompartmentRollout rolledUp:true enabled:false
-			AddSubRollout genToolsMain.roSubB packer rolledUp:true enabled:false
+			AddSubRollout genToolsMain.roSubB fileinDiXporter enabled:false
+			--AddSubRollout genToolsMain.roSubB diXporterRollout enabled:false
+			--AddSubRollout genToolsMain.roSubB addCompartmentRollout rolledUp:true enabled:false
+			--AddSubRollout genToolsMain.roSubB packer rolledUp:true enabled:false
 				
 			-- Get the Generate Mapping Script
 			global mappinggencheck 
