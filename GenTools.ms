@@ -12,8 +12,9 @@ if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
 		
 */
 	defaultErrorMessage = "Nothing Selected"
-	rootFolder = (getDir #userScripts) + "/GenTools"
-	preferencesIni = rootFolder + "/GenToolsPreferences.ini" 
+	rootFolder = (getDir #userScripts) + "\\GenTools"
+	preferencesIni = rootFolder + "\\GenToolsPreferences.ini" 
+	rolloutIni = rootFolder + "\\RolloutPreferences.ini"
 		
 	scriptFolder = getFileNamePath (getThisScriptFilename())
 	sourceFolder = scriptFolder + "source\\"
@@ -29,13 +30,15 @@ if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
 		copyFile defaultProfile preferencesIni
 		format "Copied % to % \n" defaultProfile preferencesIni
 	)
+	modules = #()
+	modulesDir = #()
 /*
 
 		General Menu Settings
 	
 */
 	menuHeight = (getIniSetting preferencesIni "Location and Position" "height") as integer
-	menuWidth = (getIniSetting preferencesIni "Location and Position" "width") as integer
+	menuWidth = 190
 	getMenuWidth = (getIniSetting preferencesIni "Location and Position" "x") as integer
 	getMenuHeight = (getIniSetting preferencesIni "Location and Position" "y") as integer
 	subMenuBuffer = 89
@@ -45,20 +48,22 @@ if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
 		Prefrences!
 	
 */
-	rollout genToolsPreferencesRollout "GenTools Preferences" width:160 height:264
+	rollout genToolsPreferencesRollout "GenTools Preferences" width:160 height:184
 	(
 		checkbox startupcheck "Load on Startup" pos:[16,8] width:136 height:16 checked:false
-		button resetbtn "Reset GenTools" pos:[24,240] width:112 height:16
+		button resetbtn "Reset GenTools" pos:[25,160] width:112 height:16 enabled:false
 		radiobuttons dockedstateradio "Start Position-" pos:[16,32] width:89 height:62 labels:#("Floating", "Docked Left", "Docked Right")
 		checkbox genmappingcheck "Generate Mapping" pos:[16,120] width:128 height:16 checked:true
 		checkbox realworldcheck "Real World Scale" pos:[16,136] width:128 height:16 checked:true
 		label lbl4 "Auto Gen Mapping on Modifiers" pos:[5,100] width:152 height:17
 		on genToolsPreferencesRollout open do
 		(
+			/*
 			startupcheck.checked = (getIniSetting preferencesIni "Startup" "startup" as booleanClass)
 			dockedstateradio.state = (getIniSetting preferencesIni "Location and Position" "dockstate" as integer)
 			genmappingcheck.state = (getIniSetting preferencesIni "Mod Info" "genmapping") as booleanClass
 			realworldcheck.state = (getIniSetting preferencesIni "Mod Info" "realworldmapping") as booleanClass
+			*/
 		)
 		on startupcheck changed state do
 		(
@@ -114,12 +119,52 @@ if classOf ::genToolsMain == RolloutClass do DestroyDialog ::genToolsMain
 		)
 	)
 	
+	
+rollout suborder "Rollout Order" width:160 height:232
+(
+	listBox moduleslist "" pos:[10,11] width:142 height:13 items:modules
+	button upbtn "up" pos:[40,197] width:32 height:22
+	button downbtn "down" pos:[80,197] width:32 height:22
+	on suborder close do
+	(
+		for i = 1 to modules.count do
+		(
+			setIniSetting rolloutIni modules[i] "order"  (i as string)
+		)
+	)
+	on upbtn pressed  do
+	(
+		if moduleslist.selection > 1 do
+		(
+			print "up"
+			storedMod = modules[moduleslist.selection-1]
+			modules[moduleslist.selection-1] = modules[moduleslist.selection]
+			modules[moduleslist.selection] = storedMod
+			moduleslist.items = modules
+			moduleslist.selection -= 1
+		)
+	)
+	on downbtn pressed  do
+	(
+		if moduleslist.selection < modules.count do
+		(
+			print "down"
+			storedMod = modules[moduleslist.selection+1]
+			modules[moduleslist.selection+1] = modules[moduleslist.selection]
+			modules[moduleslist.selection] = storedMod
+			moduleslist.items = modules
+			moduleslist.selection += 1
+		)
+	)
+)
+	
 rollout mainPrefrences "Prefrences" width:184 height:404
 (
 	subRollout roSubA "" pos:[0,0] width:184 height:400
 	
 	on mainPrefrences open  do
 	(
+		AddSubRollout mainPrefrences.roSubA suborder
 		AddSubRollout mainPrefrences.roSubA genToolsPreferencesRollout
 	)
 )
@@ -332,13 +377,27 @@ rollout mainPrefrences "Prefrences" width:184 height:404
 			repositionUI()
 			-- Add all the sub rollouts
 			--AddSubRollout genToolsMain.roSubA mainTools
-			modules = getFiles (sourceFolder + modulesFolder + "*.ms")
-			for i in modules do
+			modulesDir = getFiles (sourceFolder + modulesFolder + "*.ms")
+			for i in modulesDir do
 			(
 				fileIn i
 				rolloutName = getFilenameFile i
+				append modules (rolloutName as string)
 				print rolloutName
 				AddSubRollout genToolsMain.roSubA (execute rolloutName)
+				rolled = getIniSetting rolloutIni rolloutName "rolledUp" as booleanClass
+				if rolled != undefined do
+				(
+					(execute rolloutName).open = rolled
+				)
+			)
+			format "modules : %" modules
+		)
+		on genToolsMain close do
+		(
+			for i in modules do
+			(
+				setIniSetting rolloutIni i "rolledUp" ((execute i).open as string)
 			)
 		)
 		on genToolsMain resized size do
@@ -387,9 +446,10 @@ rollout mainPrefrences "Prefrences" width:184 height:404
 		Generate the Dialog!
 */
 
-	createDialog genToolsMain menuWidth menuHeight getMenuWidth getMenuHeight style:#(#style_toolwindow, #style_sysmenu, #style_minimizebox)
+	createDialog genToolsMain menuWidth  style:#(#style_toolwindow, #style_sysmenu, #style_minimizebox)
 	cui.RegisterDialogBar genToolsMain style:#(#cui_dock_vert, #cui_floatable, #cui_handels) minSize:[menuWidth, 350] maxSize:[menuWidth,1600]
-	if getIniSetting preferencesIni "Location and Position" "dockstate" as integer != 1 do
+	/*
+if getIniSetting preferencesIni "Location and Position" "dockstate" as integer != 1 do
 	(
 		if getIniSetting preferencesIni "Location and Position" "dockstate" as integer == 2 do
 		(

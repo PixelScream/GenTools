@@ -10,4 +10,12 @@ rollout fileinDiXporter "Open DiXporter" width:162 height:300
 	(
 		filein @"Y:\Resources\2014\GenTools\DiXporter\DiXporter_Experimental.ms"
 	)
+	/*
+	on fileinDiXporter rolledUp bState do
+	(
+		print "yo"
+		format "% \n setting rolled up % \n" preferencesIni bState
+		setIniSetting preferencesIni "fileinDiXporter" "rolledUp" (bState as string)
+	)
+*/
 )
