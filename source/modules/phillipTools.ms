@@ -142,6 +142,7 @@ rollout phillipTools "Phil Tools" width:160 height:184
 			for m in obj.modifiers do 
 			( 
 				if (classof m as string) == "TurboSmooth" do ( m.isolineDisplay = true)
+				if (classof m as string) == "TurboSmooth_Pro" do ( m.isolineDisplay = 0)
 			)
 		)
 	)
