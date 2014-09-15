@@ -1,5 +1,6 @@
 rollout fileinDiXporter "Open DiXporter" width:162 height:300
 (
+	local cat = "GT_Export" 
 	button btn13 "DiXporter" pos:[24,8] width:120 height:16
 	button btn15 "eXperimental" pos:[25,32] width:120 height:16
 	on btn13 pressed do

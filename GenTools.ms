@@ -378,17 +378,36 @@ rollout mainPrefrences "Prefrences" width:184 height:404
 			-- Add all the sub rollouts
 			--AddSubRollout genToolsMain.roSubA mainTools
 			modulesDir = getFiles (sourceFolder + modulesFolder + "*.ms")
+			for i = 1 to modulesDir.count do
+			(
+				
+			)
 			for i in modulesDir do
 			(
 				fileIn i
 				rolloutName = getFilenameFile i
 				append modules (rolloutName as string)
 				print rolloutName
-				AddSubRollout genToolsMain.roSubA (execute rolloutName)
-				rolled = getIniSetting rolloutIni rolloutName "rolledUp" as booleanClass
-				if rolled != undefined do
+				
+				try(a = (execute rolloutName).cat)catch()
+				if a == "GT_Export" then
 				(
-					(execute rolloutName).open = rolled
+					AddSubRollout genToolsMain.roSubB (execute rolloutName)
+				)
+				else
+				(
+					AddSubRollout genToolsMain.roSubA (execute rolloutName)
+				)
+				
+				--AddSubRollout genToolsMain.roSubA (execute rolloutName)
+				rolled = getIniSetting rolloutIni rolloutName "rolledUp" 
+				if rolled != undefined then
+				(
+					(execute rolloutName).open = rolled as booleanClass
+				)
+				else
+				(
+					(execute rolloutName).open = true
 				)
 			)
 			format "modules : %" modules
