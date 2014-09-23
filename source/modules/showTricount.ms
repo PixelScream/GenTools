@@ -13,6 +13,8 @@ rollout showTricount "showTricount"
 		(
 			print selection[1].name
 			objlbl.text = selection[1].name
+			--if classOf selection[1] == Editable 
+			--countlbl.text = selection[1].numFaces
 		)
 	)--end fn
 	
@@ -23,7 +25,7 @@ rollout showTricount "showTricount"
 	)
 )
 --add the callback that executes the function:
---callbacks.addScript #selectionSetChanged "feedback.printSelName()" id:#myCallbackID
+callbacks.addScript #selectionSetChanged "showTricount.printSelName()" id:#myCallbackID
 
 
 --createDialog feedback

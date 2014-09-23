@@ -5,11 +5,11 @@ rollout fileinDiXporter "Open DiXporter" width:162 height:300
 	button btn15 "eXperimental" pos:[25,32] width:120 height:16
 	on btn13 pressed do
 	(
-		filein @"Y:\Resources\2014\GenTools\DiXporter\DiXporter.ms"
+		filein @"Y:\Resources\MaxScript\Internal\DiXporter\DiXporter.ms"
 	)
 	on btn15 pressed do
 	(
-		filein @"Y:\Resources\2014\GenTools\DiXporter\DiXporter_Experimental.ms"
+		filein @"Y:\Resources\MaxScript\Internal\DiXporter\DiXporter_Experimental.ms"
 	)
 	/*
 	on fileinDiXporter rolledUp bState do
