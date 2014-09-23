@@ -9,12 +9,20 @@ rollout showTricount "showTricount"
 	
 	fn printSelName=
 	(
+		curObj = selection[1]
 		if selection[1] != undefined do 
 		(
-			print selection[1].name
-			objlbl.text = selection[1].name
-			--if classOf selection[1] == Editable 
-			--countlbl.text = selection[1].numFaces
+			curObj = selection[1]
+			print curObj.name
+			objlbl.text = curObj.name
+			if superclassof curObj == geometryClass then
+			(
+				countlbl.text = curObj.mesh.numFaces as string
+			)
+			else
+			(
+				countlbl.text = "none mesh"
+			)
 		)
 	)--end fn
 	

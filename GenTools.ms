@@ -401,7 +401,7 @@ rollout mainPrefrences "Prefrences" width:184 height:404
 				
 				--AddSubRollout genToolsMain.roSubA (execute rolloutName)
 				rolled = getIniSetting rolloutIni rolloutName "rolledUp" 
-				if rolled != undefined then
+				if rolled != "" then
 				(
 					(execute rolloutName).open = rolled as booleanClass
 				)
