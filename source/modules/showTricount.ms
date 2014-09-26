@@ -7,6 +7,33 @@ rollout showTricount "showTricount"
 	label objlbl "name:" pos:[8,8] width:144 height:24
 	label countlbl "count" pos:[8,32] width:144 height:24
 	
+	fn CallbackTopology ev nd = 
+	(
+		if selection[1] != undefined and superclassof selection[1] == geometryClass do
+		(	
+			countlbl.text = selection[1].mesh.numFaces as string 
+		)
+	)
+
+	fn CallbackSelection ev nd =
+	(
+		if selection[1] != undefined do 
+		(
+			curObj = selection[1]
+			print curObj.name
+			objlbl.text = curObj.name
+			if superclassof curObj == geometryClass then
+			(
+				try(countlbl.text = curObj.mesh.numFaces as string)catch()
+			)
+			else
+			(
+				countlbl.text = "none mesh"
+			)
+		)
+		
+	)
+	/*
 	fn printSelName=
 	(
 		curObj = selection[1]
@@ -31,10 +58,12 @@ rollout showTricount "showTricount"
 		callbacks.removescripts #selectionSetChanged id:#myCallbackID
 		print "closing"
 	)
+	*/
 )
 --add the callback that executes the function:
-callbacks.addScript #selectionSetChanged "showTricount.printSelName()" id:#myCallbackID
-
+--callbacks.addScript #selectionSetChanged "showTricount.printSelName()" id:#myCallbackID
+callbackItem = NodeEventCallback mouseUp:true delay:1000 topologyChanged:showTricount.CallbackTopology \
+selectionChanged:showTricount.CallbackSelection
 
 --createDialog feedback
  

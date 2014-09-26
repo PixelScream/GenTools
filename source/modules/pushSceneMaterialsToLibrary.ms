@@ -6,14 +6,14 @@
 
 -- check material exists
 
-rollout pushSceneMaterialsToLibrary "updateMaterialLibrary" width:180 
+rollout pushSceneMaterialsToLibrary "pushSceneMaterialsToLibrary" width:172 height:52
 (
 	local libraryDirectory 
 	local lib
 	
-	edittext libname "" pos:[8,8] width:96 height:16 enabled:false
-	button getdirbtn "..." pos:[112,8] width:56 height:16
-	button updatebtn "Scene" pos:[16,32] width:64 height:16
+	edittext libname "" pos:[8,8] width:88 height:16 enabled:false
+	button getdirbtn "..." pos:[104,8] width:56 height:16
+	button updatebtn "Scene" pos:[8,32] width:72 height:16
 	/*
 		Functions
 	*/
@@ -49,8 +49,22 @@ rollout pushSceneMaterialsToLibrary "updateMaterialLibrary" width:180
 	(
 		for m in sceneMaterials do
 		(
+			/*
 			-- checks if it's a multimaterial and disregards
 			if classof m != Multimaterial do
+			(
+				PushMaterials m
+			)
+			*/
+			if classof m == Multimaterial then
+			(
+				print "multi mat!"
+				for i = 1 to m.count do
+				(
+					PushMaterials m[i]
+				)
+			)
+			else
 			(
 				PushMaterials m
 			)
@@ -64,7 +78,15 @@ rollout pushSceneMaterialsToLibrary "updateMaterialLibrary" width:180
 		(
 			m = obj.material
 			-- checks if it's a multimaterial and disregards
-			if classof m != Multimaterial do
+			if classof m == Multimaterial then
+			(
+				print "multi mat!"
+				for i = 1 to m.count do
+				(
+					PushMaterials m[i]
+				)
+			)
+			else
 			(
 				PushMaterials m
 			)
@@ -74,13 +96,16 @@ rollout pushSceneMaterialsToLibrary "updateMaterialLibrary" width:180
 	/*
 		Button events
 	*/
-	button updateselectedbtn "Selected" pos:[104,32] width:64 height:16
+	button updateselectedbtn "Selected" pos:[88,32] width:72 height:16
 	on getdirbtn pressed do
 	(
 		(
 			libraryDirectory = getOpenFileName()
-			print (getFilenameFile libraryDirectory)
-			libname.text = (getFilenameFile libraryDirectory)
+			--print (getFilenameFile libraryDirectory)
+			if libraryDirectory != undefined do
+			(
+				libname.text = (getFilenameFile libraryDirectory)
+			)
 		)
 	)
 	on updatebtn pressed do
