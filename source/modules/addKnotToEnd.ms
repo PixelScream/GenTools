@@ -7,7 +7,7 @@
 rollout addKnotToEnd "Add Knot" width:180 
 (
 	groupBox grp1 "Add Knot to Spline" pos:[8,0] width:168 height:40
-	spinner mulspin "Multiplier" pos:[30,16] width:72 height:16 range:[1,100,5] scale:1
+	spinner mulspin "Multiplier" pos:[30,16] width:72 height:16 range:[0,100,5] scale:0.5
 	button addbtn "Add" pos:[112,16] width:56 height:16
 	/*
 		Functions
