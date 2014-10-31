@@ -59,7 +59,7 @@ rollout addKnotToEnd "Add Knot" width:180
 	)
 	on addbtn pressed  do
 	(
-		for obj in selection do
+		for obj in selection where classOf obj.baseobject == SplineShape or classOf obj.baseObject == line do
 		(
 			AddNewKnot obj
 		)

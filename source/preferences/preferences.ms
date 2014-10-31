@@ -24,8 +24,8 @@
 		)
 		on startupcheck changed state do
 		(
-			startupFolder = (GetDir #userStartupScripts) + "/GenTools" -- startup folder
-			startupFile = startupFolder + "/GenToolsLoadOnStart.ms" -- startup file
+			startupFolder = (GetDir #userStartupScripts) + "/GenTools/" -- startup folder
+			startupFile = startupFolder + "GenToolsLoadOnStart.ms" -- startup file
 			setIniSetting preferencesIni "Startup" "startup" (startupcheck.checked as string)
 			if startupcheck.checked == true do -- if startup on, checks if file exists and creates it
 			(
@@ -37,7 +37,7 @@
 				(
 					deleteFile startupFile
 				)
-				tempFileString = sourceFolder + "/Sections/Startup/GenToolsLoadOnStart.ms" -- external startup script
+				tempFileString = sourceFolder + "startup/GenToolsLoadOnStart.ms" -- external startup script
 				copyFile tempFileString startupFile
 				format "% copied to % \n" tempFileString startupFile
 			)

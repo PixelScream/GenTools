@@ -4,9 +4,21 @@
 
 */
 /*
-fn GetViewportDirection =
+fn PosOrNeg viewDir dir =
 (
-	
+	case of
+	(
+
+	)
+	pon = undefined
+	if absDir.(dir) > 0 then
+	(
+		pon = "+"
+	)
+	else
+	(
+		pon = "-"
+	)
 )
 */
 fn GetViewDirection =
@@ -18,15 +30,13 @@ fn GetViewDirection =
 	dir = undefined
 	case of
 	(
-		(absDir.y > absDir.x and absDir.y > absDir.z): dir = "y"
 		(absDir.x > absDir.y and absDir.x > absDir.z): dir = "x"
+		(absDir.y > absDir.x and absDir.y > absDir.z): dir = "y"
 		default: dir = "z"
 	)
-	/*
-	pon = PosOrNeg viewDir dir
-	if absDir.(execute dir)
-	dir = pon + dir
-	*/
+	--pon = PosOrNeg viewDir dir
+	--dir = pon + dir
+	
 	return dir
 )
 
